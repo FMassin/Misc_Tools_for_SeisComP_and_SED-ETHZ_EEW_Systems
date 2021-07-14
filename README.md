@@ -1,1 +1,3 @@
-# Misc_Tools_for_SeisComP_and_SED-ETHZ_EEW_Systems-
+# Misc Tools for SeisComP and SED-ETHZ EEW Systems
+
+This is just a set of tools...
