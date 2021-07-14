@@ -1,0 +1,18 @@
+#!/bin/bash
+set -x #echo on
+
+FINDERFILE=$SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
+
+CONF=${2}_PS
+sed 's/GMT_PLOT .*/GMT_PLOT yes/' $2 > $CONF
+sed -i 's/DATA_FOLDER .*/DATA_FOLDER tmp_finder_gif/' $CONF
+mkdir -p tmp_finder_gif/temp
+rm tmp_finder_gif/temp/*ps tmp_finder_gif/temp/*ps
+
+$FINDERFILE $CONF $1 0 $(ls $1/data*|wc -l) live
+
+ls -ltr tmp_finder_gif/temp/*ps| awk '{print $NF}' |while read F
+do 
+	convert -density 200  $F ${F}.jpg 
+done 
+convert -verbose -delay 50 -loop 0 -density 200 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) $(basename $1).gif     

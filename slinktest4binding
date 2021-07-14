@@ -1,0 +1,38 @@
+#!/bin/bash
+
+D=`date "+%H:%M"`
+C=`date "+%H:%M" --date="1 minute ago"`
+
+
+IFS=$'\n' 
+SLINK=($( slinktool -Q $1|awk '$NF~/'$D'/||$NF~/'$C'/{print $0}' ))
+echo "${SLINK[*]}"
+
+STAT=($( echo "${SLINK[*]}" |awk '{print $1,$2}'|uniq ))
+echo "${STAT[*]}"
+
+echo "${STAT[*]}" | while IFS=" " read N S 
+do
+	echo $N"."$S":"
+	CHAN=($( echo "${SLINK[*]}" |grep "^$N $S"|awk '{print $1,$2,$3,$4}'|uniq ))
+	echo "${CHAN[*]}" 
+	for O in Z E N 
+	do 
+		for TRIG in HH$O EH$O HN$O EN$O SN$O
+		do
+			echo "${CHAN[*]}" | awk '$NF~/'$TRIG'/{print $0}'
+		done
+	done|head -1 | while IFS=" " read N S L C
+	do 
+		echo $N $S $L $C is the best available
+		BOUND=$SEISCOMP_ROOT/etc/key/station_${N}_${S}
+		ls $BOUND || echo WARNING no binding reference $BOUND
+		grep global $BOUND || echo WARNING no global binding in $BOUND
+		PROF=`grep global $BOUND|sed 's;:;/profile_;'`
+		PROFILE=$SEISCOMP_ROOT/etc/key/$PROF
+		DETECL=`grep detecLocid $PROFILE`
+		DETECC=`grep detecStream $PROFILE` 
+		echo $DETECL |grep $L || echo WARNING detecLocid != $L for $N $S "("${DETECL} in $PROFILE $BOUND")"
+		echo $DETECC |grep ${C:0:2} || echo WARNING detecStream != ${C:0:2} for $N $S $L "("${DETECC} in $PROFILE $BOUND")"
+	done
+done
