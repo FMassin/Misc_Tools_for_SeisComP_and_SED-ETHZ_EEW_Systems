@@ -4,12 +4,14 @@ set -x #echo on
 EVENT=${1}
 CONF=${2}_PS
 FINDERFILE=${3}
+GIF=${4}
+
 #SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
 
 sed 's/GMT_PLOT .*/GMT_PLOT yes/' $2 > $CONF
 sed -i 's/DATA_FOLDER .*/DATA_FOLDER tmp_finder_gif/' $CONF
 mkdir -p tmp_finder_gif/temp
-rm tmp_finder_gif/temp/*ps tmp_finder_gif/temp/*ps
+rm tmp_finder_gif/temp/*ps tmp_finder_gif/temp/*jpg
 
 $FINDERFILE $CONF $1 0 $(ls $1/data*|wc -l) live
 
@@ -17,4 +19,4 @@ ls -ltr tmp_finder_gif/temp/*ps| awk '{print $NF}' |while read F
 do 
 	convert -density 100  $F ${F}.jpg 
 done 
-convert -verbose -delay 50 -loop 0 -density 100 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) $(basename $1).gif     
+convert -verbose -delay 50 -loop 0 -density 100 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) ${GIF}
