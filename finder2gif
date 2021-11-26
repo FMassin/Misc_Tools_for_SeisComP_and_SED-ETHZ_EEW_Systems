@@ -1,9 +1,11 @@
 #!/bin/bash
 set -x #echo on
 
-FINDERFILE=$SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
-
+EVENT=${1}
 CONF=${2}_PS
+FINDERFILE=${3}
+#SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
+
 sed 's/GMT_PLOT .*/GMT_PLOT yes/' $2 > $CONF
 sed -i 's/DATA_FOLDER .*/DATA_FOLDER tmp_finder_gif/' $CONF
 mkdir -p tmp_finder_gif/temp
