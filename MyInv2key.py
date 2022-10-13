@@ -38,8 +38,8 @@ for n in inv:
         with open(bound, 'w') as f:
             bound = (c.code,
                      c.location_code)
-            f.write('global:%s_%s' % bound)
-            f.write('scautopick:default')
+            f.write('global:%s_%s\n' % bound)
+            f.write('scautopick:default\n')
             for bound in sys.argv[3:]:
                 f.write(bound)
         
@@ -47,7 +47,7 @@ for n in inv:
         profile = '%s/etc/key/global/profile_%s_%s' % profile
         if not os.path.exists(profile):
             with open(profile, 'w') as f:
-                f.write('amplitudes.enableResponses = true')
-                f.write('detecStream = %s'%(c.code))
+                f.write('amplitudes.enableResponses = true\n')
+                f.write('detecStream = %s\n'%(c.code))
                 if len(c.location_code):
-                    f.write('detecLocid = %s'%(c.location_code))
+                    f.write('detecLocid = %s\n'%(c.location_code))
