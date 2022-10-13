@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env seiscomp-python
 from obspy import read_inventory
 import sys,os
 
