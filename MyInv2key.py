@@ -50,4 +50,4 @@ for n in inv:
                 f.write('amplitudes.enableResponses = true')
                 f.write('detecStream = %s'%(c.code))
                 if len(c.location_code):
-                    f.write('detecLocid = %s'(c.location_code))
+                    f.write('detecLocid = %s'%(c.location_code))
