@@ -6,27 +6,29 @@
 # $3: path to exec finder_run
 
 set -x  
-
-ls tmp_finder_gif/temp/ || mkdir -p tmp_finder_gif/temp
-ls tmp_finder_gif/temp/* && rm tmp_finder_gif/temp/*
-
+CONF=${2}_PS
 FINDERFILE=$3
 #FINDERFILE=$SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
 
-EVENT=${1}
-CONF=${2}_PS
-FINDERFILE=${3}
-GIF=${1}/replay.gif
-
 sed 's/GMT_PLOT .*/GMT_PLOT yes/' $2 > $CONF
 sed -i 's/DATA_FOLDER .*/DATA_FOLDER tmp_finder_gif/' $CONF
-pscoast >/dev/null 2>&1     && sed -i '/GMT_PREFIX .*/GMT_PREFIX --- /' $CONF
-gmt pscoast >/dev/null 2>&1 && sed -i '/GMT_PREFIX .*/GMT_PREFIX gmt /' $CONF
+which pscoast && sed -i 's/GMT_PREFIX .*/GMT_PREFIX --- /' $CONF || ( which gmt && sed -i 's/GMT_PREFIX .*/GMT_PREFIX gmt /' $CONF || (echo GMT not found && exit 1) )
 
-$FINDERFILE $CONF $1 0 $(ls $1/data*|wc -l) live > $1/replay.stdout 2> $1/replay.stderr
+ls -d $1 | while read EVENT;
+do
+	GIF=${EVENT}/replay.gif
+	OUT=${EVENT}/replay.stdout
+	ERR=${EVENT}/replay.stderr
+	NDATA=$(ls ${EVENT}/data*|wc -l)
+	
+	ls tmp_finder_gif/temp/ || mkdir -p tmp_finder_gif/temp
+	ls tmp_finder_gif/temp/* && rm tmp_finder_gif/temp/*
 
-ls -ltr tmp_finder_gif/temp/*ps| awk '{print $NF}' |while read F
-do 
-	convert -density 100  $F ${F}.jpg 
-done 
-convert -verbose -delay 50 -loop 0 -density 100 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) ${GIF}
+	$FINDERFILE $CONF ${EVENT} 0 ${NDATA} live > ${OUT} 2> ${ERR}
+
+	ls -ltr tmp_finder_gif/temp/*ps| awk '{print $NF}' |while read F
+	do 
+		convert -density 100  $F ${F}.jpg 
+	done 
+	convert -verbose -delay 50 -loop 0 -density 100 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) ${GIF}
+done
