@@ -1,0 +1,39 @@
+MASKSTORE=/home/sysop/seiscomp3/share/finder_masks
+FINDERFILE=/home/sysop/seiscomp3/share/FinDer/finder_file/finder_run
+CONFIGFILE=/home/sysop/seiscomp3/share/FinDer/config/finder_20asym.config
+FDNSWS="192.168.44.167:8080"
+SLINK="192.168.44.167:18000"
+
+TIMESTAMP=`date -Iseconds`
+MASKDIR=$MASKSTORE/$TIMESTAMP
+
+
+mkdir -p $MASKDIR
+mkdir -p $MASKDIR/424242424
+mkdir -p $MASKDIR/temp
+
+slinktool -Q $SLINK > $MASKDIR/sl.tmp 
+
+echo "# 424242424 1" > $MASKDIR/424242424/data_0
+
+curl "http://${FDNSWS}/fdsnws/station/1/query?level=channel&channel=HHZ,HNZ,HGZ&format=text"|while IFS="|" read N S L C LA LO EL T
+do 
+	grep "$N *$S *$L *$C" $MASKDIR/sl.tmp >/dev/null \
+		&& echo "$LA  $LO  $N.$S.$C.${L:---}  424242424.2  424.2" >> $MASKDIR/424242424/data_0
+done
+
+head $MASKDIR/424242424/data_0
+
+CONF=$MASKDIR/$( basename ${CONFIGFILE} )_MASK
+cp ${CONFIGFILE} $CONF
+sed -i '/^GMT_PLOT .*/d' $CONF
+sed -i '/^DATA_FOLDER  .*/d' $CONF 
+sed -i '/^REGIONAL_MASK .*/d' $CONF
+echo GMT_PLOT yes >> $CONF
+echo DATA_FOLDER $MASKDIR >> $CONF
+echo REGIONAL_MASK calculate >> $CONF 
+ 
+tail $CONF
+grep REGIONAL_MASK $CONF
+
+$FINDERFILE $CONF $MASKDIR/424242424 0 0 live

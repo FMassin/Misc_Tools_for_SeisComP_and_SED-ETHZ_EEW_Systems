@@ -5,7 +5,7 @@
 # $2: config file
 # $3: path to exec finder_run
 
-set -x #echo on
+set -x  
 
 ls tmp_finder_gif/temp/ || mkdir -p tmp_finder_gif/temp
 ls tmp_finder_gif/temp/* && rm tmp_finder_gif/temp/*
@@ -13,7 +13,11 @@ ls tmp_finder_gif/temp/* && rm tmp_finder_gif/temp/*
 FINDERFILE=$3
 #FINDERFILE=$SEISCOMP_ROOT"/share/FinDer/finder_file/finder_run"
 
+EVENT=${1}
 CONF=${2}_PS
+FINDERFILE=${3}
+GIF=${1}/replay.gif
+
 sed 's/GMT_PLOT .*/GMT_PLOT yes/' $2 > $CONF
 sed -i 's/DATA_FOLDER .*/DATA_FOLDER tmp_finder_gif/' $CONF
 pscoast >/dev/null 2>&1     && sed -i '/GMT_PREFIX .*/GMT_PREFIX --- /' $CONF
@@ -23,6 +27,6 @@ $FINDERFILE $CONF $1 0 $(ls $1/data*|wc -l) live > $1/replay.stdout 2> $1/replay
 
 ls -ltr tmp_finder_gif/temp/*ps| awk '{print $NF}' |while read F
 do 
-	convert -density 200  $F ${F}.jpg 
+	convert -density 100  $F ${F}.jpg 
 done 
-convert -verbose -delay 50 -loop 0 -density 200 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) $1/replay.gif     
+convert -verbose -delay 50 -loop 0 -density 100 $( ls -ltr tmp_finder_gif/temp/*jpg| awk '{print $NF}' ) ${GIF}

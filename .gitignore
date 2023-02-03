@@ -1,0 +1,3 @@
+*.xml
+*.mseed
+__pycache__/*.pyc
